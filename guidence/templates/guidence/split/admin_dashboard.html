@@ -1,0 +1,257 @@
+{% extends 'guidence/split/admin_base.html' %}
+{% block content %}
+<div class="container-fluid p-4" style="background-color: #f4f7f6; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm text-white" 
+                 style="background: linear-gradient(45deg, #3f7afc, #52a1ff); border-radius: 12px; transition: transform 0.3s ease; cursor: pointer;"
+                 onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <p class="mb-0 opacity-75 small fw-bold text-uppercase">Total Users</p>
+                            <h2 class="fw-bold mb-0">{{ total_users|default:"0" }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-2x opacity-25"></i>
+                    </div>
+                    <small class="opacity-75">Registered Patients</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm text-white" 
+                 style="background: linear-gradient(45deg, #7e3af2, #ab47bc); border-radius: 12px; transition: transform 0.3s ease; cursor: pointer;"
+                 onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <p class="mb-0 opacity-75 small fw-bold text-uppercase">Total Admins</p>
+                            <h2 class="fw-bold mb-0">{{ total_admins|default:"0" }}</h2>
+                        </div>
+                        <i class="fas fa-user-shield fa-2x opacity-25"></i>
+                    </div>
+                    <small class="opacity-75">Staff & Management</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm text-white" 
+                 style="background: linear-gradient(45deg, #44a08d, #136a8a); border-radius: 12px; transition: transform 0.3s ease; cursor: pointer;"
+                 onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <p class="mb-0 opacity-75 small fw-bold text-uppercase">Symptoms History</p>
+                            <h2 class="fw-bold mb-0">{{ total_symptoms|default:"0" }}</h2>
+                        </div>
+                        <i class="fas fa-notes-medical fa-2x opacity-25"></i>
+                    </div>
+                    <small class="opacity-75">Total Logs Recorded</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm text-white" 
+                 style="background: linear-gradient(45deg, #d4418e, #ff9a00); border-radius: 12px; transition: transform 0.3s ease; cursor: pointer;"
+                 onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <p class="mb-0 opacity-75 small fw-bold text-uppercase">Illness Info</p>
+                            <h2 class="fw-bold mb-0">{{ total_illnesses|default:"0" }}</h2>
+                        </div>
+                        <i class="fas fa-book-medical fa-2x opacity-25"></i>
+                    </div>
+                    <small class="opacity-75">Database Records</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">Patients Survey</h6>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light border" type="button">Monthly</button>
+                        </div>
+                    </div>
+                    <div style="height: 250px;"> 
+                        <canvas id="patientSurveyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-4">Todays Appointment</h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
+                            <thead class="table-light text-muted">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Patient Name</th>
+                                    <th>Gender</th>
+                                    <th>Last Visit</th>
+                                    <th>Diseases</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in recent_appointments %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if log.user.profile_picture %}
+                                                <img src="{{ log.user.profile_picture.url }}" alt="{{ log.user.username }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 32px; height: 32px; font-size: 11px;">
+                                                    {{ log.user.username|first|upper }}
+                                                </div>
+                                            {% endif %}
+                                            <span class="fw-semibold">{{ log.user.username }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if log.user.health_profile.gender %}
+                                            {{ log.user.health_profile.get_gender_display|default:"N/A" }}
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ log.entry_date|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <span class="badge rounded-pill border border-danger text-danger bg-light px-3 py-2" style="font-weight: 500;">
+                                            {{ log.symptom_name }}
+                                        </span>
+                                    </td>
+                                    
+                                    <td><a href="{% url 'admin_symptom_history' %}?user={{ log.user.id }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" >Details</a></td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="7" class="text-center text-muted p-4">No recent appointments found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                <div class="card-body text-center">
+                    <h6 class="fw-bold text-start mb-3">Appointment Review</h6>
+                    <div class="position-relative mx-auto" style="height: 180px; width: 180px;">
+                        <canvas id="reviewChart"></canvas>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center">
+                            <small class="text-muted d-block lh-1" style="font-size: 0.65rem; letter-spacing: 1px;">TOTAL</small>
+                            <h4 class="fw-bold mb-0">{{ total_symptoms|default:"0" }}</h4>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3 mt-4" style="font-size: 0.75rem;">
+                        <span><i class="fas fa-circle me-1" style="color: #3f7afc;"></i> User</span>
+                        <span><i class="fas fa-circle me-1" style="color: #44a08d;"></i> Symptom</span>
+                        <span><i class="fas fa-circle me-1" style="color: #ff9a00;"></i> Illness</span>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm mt-4 w-100 py-2 border-2 fw-bold" style="border-radius: 10px;">Modify Availability</button>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-4">Patients Group</h6>
+                    {% for group in patient_groups %}
+                    <div class="d-flex align-items-center mb-3 pb-2 border-bottom border-light">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white me-3 
+                             {% cycle 'bg-warning' 'bg-primary' 'bg-info' 'bg-success' %}" 
+                             style="width: 38px; height: 38px; font-weight: bold; font-size: 0.85rem;">
+                            {{ group.symptom_name|first|upper }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 fw-bold" style="font-size: 0.9rem;">{{ group.symptom_name }}</h6>
+                            <small class="text-muted" style="font-size: 0.75rem;">Category Management</small>
+                        </div>
+                        <div class="text-muted small fw-bold">{{ group.total }}</div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small text-center">No groups available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 1. Appointment Review (Doughnut Chart)
+    new Chart(document.getElementById('reviewChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['User', 'Symptom', 'Illness'],
+            datasets: [{
+                data: [45, 30, 25], // Aap ise backend variable {{ review_data }} se replace kar sakte hain
+                backgroundColor: ['#3f7afc', '#44a08d', '#ff9a00'],
+                borderWidth: 0,
+                hoverOffset: 5
+            }]
+        },
+        options: {
+            cutout: '82%',
+            plugins: { legend: { display: false } },
+            maintainAspectRatio: false
+        }
+    });
+
+    // 2. Patients Survey (Line Chart)
+    const surveyCtx = document.getElementById('patientSurveyChart').getContext('2d');
+    new Chart(surveyCtx, {
+        type: 'line',
+        data: {
+            labels: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00'],
+            datasets: [{
+                label: 'New Patients',
+                data: [25, 45, 35, 60, 42, 85, 65],
+                borderColor: '#7e3af2',
+                backgroundColor: 'rgba(126, 58, 242, 0.08)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 3,
+                pointBackgroundColor: '#7e3af2'
+            }, {
+                label: 'Old Patients',
+                data: [15, 20, 48, 25, 45, 52, 38],
+                borderColor: '#44a08d',
+                backgroundColor: 'rgba(68, 160, 141, 0.08)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 3,
+                pointBackgroundColor: '#44a08d'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { 
+                    position: 'top', 
+                    align: 'end',
+                    labels: { boxWidth: 8, usePointStyle: true, font: { size: 11 } } 
+                } 
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f0f0f0' }, border: { dash: [4, 4] } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}
