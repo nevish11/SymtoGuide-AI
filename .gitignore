@@ -1,9 +1,0 @@
-# Environment
-env/
-venv/
-ENV/
-.venv/
-db.sqlite3
-# Environments
-.env
-.env.*
