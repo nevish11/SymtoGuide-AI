@@ -145,3 +145,4 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For developm
 # For development, we're using console backend which prints emails to console
 # In production, configure with your email service provider
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
