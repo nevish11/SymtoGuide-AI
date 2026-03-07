@@ -127,7 +127,7 @@ STATICFILES_DIRS = [
 STATIC_ROOT  = os.path.join(BASE_DIR, 'staticroot')
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
 
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 LOGIN_URL = 'sign-in'
 LOGIN_REDIRECT_URL = 'user_dashboard'
 LOGOUT_REDIRECT_URL = 'sign-in'
