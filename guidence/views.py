@@ -656,7 +656,6 @@ def user_latest_ai_analysis(request):
 def forgotpassword(request):
     if request.method == "POST":
         email = request.POST.get('email')
-        
         try:
             user = CustomUser.objects.get(email=email)
             
