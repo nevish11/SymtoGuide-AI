@@ -121,14 +121,13 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
-
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'guidence', 'static'),
 ]
 STATIC_ROOT  = os.path.join(BASE_DIR, 'staticroot')
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
 
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 LOGIN_URL = 'sign-in'
 LOGIN_REDIRECT_URL = 'user_dashboard'
 LOGOUT_REDIRECT_URL = 'sign-in'

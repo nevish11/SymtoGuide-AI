@@ -495,29 +495,39 @@ def user_run_ai_analysis(request, symptom_id):
     )
 
     ai_response = analyze_symptoms_with_ai(symptom_text)
-    raw_content = ai_response["choices"][0]["message"]["content"]
 
+    # 🔹 AI response se text nikalo
+    raw_content = ""
+    try:
+        raw_content = ai_response["choices"][0]["message"]["content"]
+    except Exception:
+        raw_content = str(ai_response)
+
+    # 🔹 ```json block remove karo agar ho
     if "```json" in raw_content:
         raw_content = raw_content.split("```json")[1].split("```")[0].strip()
 
+    # 🔹 JSON parse karo
+    data = {}
     try:
         data = json.loads(raw_content)
     except Exception:
-        data = {}
+        pass
 
-    # 🔹 AI se aayi illnesses list
     illnesses = data.get("illnesses") or []
-    guidance_text = data.get("guidance")
-    if guidance_text:
+
+    guidance_text = data.get("guidance") or raw_content
+
+    if data.get("guidance"):
         illnesses.append({
             "type": "guidance",
-            "text": guidance_text
+            "text": data.get("guidance")
         })
 
     analysis, _ = AIAnalysis.objects.update_or_create(
         symptom_log=symptom,
         defaults={
-            "possible_illnesses": illnesses,   # 👈 yahin AI guidance bhi save ho rahi hai
+            "possible_illnesses": illnesses,
             "confidence_score": data.get("confidence") or 0,
             "urgency_level": data.get("urgency") or "self_monitor",
         }
@@ -526,7 +536,7 @@ def user_run_ai_analysis(request, symptom_id):
     return render(request, "guidence/split/user_ai_analysis.html", {
         "symptom": symptom,
         "analysis": analysis,
-        "ai_text": guidance_text,   # frontend display ke liye
+        "ai_text": guidance_text,
     })
 
 @staff_member_required
