@@ -1,0 +1,101 @@
+{% extends "guidence/split/user_base.html" %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2 class="fw-bold text-primary">🩺 AI Symptom Analysis Report</h2>
+            <p class="text-muted">Analysis generated based on your reported symptoms</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Symptom Details</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Symptom:</span>
+                            <span class="fw-bold">{{ symptom.symptom_name }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Body Part:</span>
+                            <span class="fw-bold">{{ symptom.body_part|capfirst }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Severity:</span>
+                            <span class="badge {% if symptom.severity == '3' %}bg-danger{% else %}bg-warning text-dark{% endif %} px-3">
+                                {{ symptom.get_severity_display }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Duration:</span>
+                            <span class="fw-bold">{{ symptom.get_duration_display }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 border-end">
+                            <h6 class="text-muted text-uppercase small fw-bold">Confidence Score</h6>
+                            <div class="d-flex align-items-center">
+                                <h2 class="mb-0 me-3">{{ analysis.confidence_score }}%</h2>
+                                <div class="progress flex-grow-1" style="height: 10px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ analysis.confidence_score }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 ps-md-4">
+                            <h6 class="text-muted text-uppercase small fw-bold">Urgency Level</h6>
+                            <h4 class="{% if analysis.urgency_level == 'emergency' %}text-danger{% else %}text-info{% endif %} mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ analysis.get_urgency_level_display }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-dark">🔍 Possible Illnesses</h5>
+                </div>
+                <div class="card-body">
+                    {% for illness in analysis.possible_illnesses %}
+                    <div class="p-3 border rounded mb-3 bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold">{{ illness.name }}</h6>
+                            <span class="badge bg-primary rounded-pill">{{ illness.match }}% Match</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">No specific illnesses identified.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm bg-info text-white">
+                <div class="card-body p-4">
+                    <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>AI Health Guidance</h5>
+                    <p class="card-text fs-5 mt-2">{{ ai_text }}</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-end">
+                <a href="{% url 'user_symptom_history' %}" class="btn btn-outline-secondary px-4">
+                    <i class="fas fa-arrow-left me-2"></i>Back to History
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

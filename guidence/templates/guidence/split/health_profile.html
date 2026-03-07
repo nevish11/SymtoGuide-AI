@@ -1,0 +1,154 @@
+{% extends "guidence/split/user_base.html" %}
+{% block content %}
+
+<div class="container-fluid mt-4">
+  <div class="row">
+
+    <!-- ================= LEFT SIDE : DISPLAY DATA ================= -->
+    <div class="col-lg-4 mb-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+
+         <!-- Profile Picture -->
+          {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}"
+                class="rounded-circle mb-3"
+                width="120"
+                height="120"
+                alt="Profile Picture">
+          {% else %}
+            <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=667eea&color=fff&size=120"
+            class="rounded-circle mb-3"
+            width="120"
+            height="120"
+            alt="Default Profile">
+          {% endif %}
+
+          <h5 class="mb-0">{{ request.user.username }}</h5>
+          <p class="text-muted">{{ request.user.email }}</p>
+
+          <hr>
+
+          <p><strong>Gender:</strong> {{ health_profile.gender|default:"-" }}</p>
+          <p><strong>Blood Type:</strong> {{ health_profile.blood_type|default:"-" }}</p>
+          <p><strong>Height:</strong> {{ health_profile.height|default:"-" }} cm</p>
+          <p><strong>Weight:</strong> {{ health_profile.weight|default:"-" }} kg</p>
+          <p><strong>Known Conditions:</strong> {{ health_profile.known_conditions|default:"-" }}</p>
+          <p><strong>Allergies:</strong> {{ health_profile.allergies|default:"-" }}</p>
+          <p><strong>Blood Pressure:</strong> {{ health_profile.blood_pressure|default:"-" }}</p>
+          <p><strong>Last Checkup Date:</strong> {{ health_profile.last_checkup_date|default:"-" }}</p>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= RIGHT SIDE : FORM ================= -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Health Profile</h4>
+        </div>
+        <div class="card-body">
+
+          <form method="POST">
+            {% csrf_token %}
+
+            <!-- Gender -->
+            <div class="mb-3">
+              <label class="form-label">Gender:</label>
+              <select class="form-select" name="gender">
+                <option value="">Select Gender</option>
+                <option value="male" {% if health_profile.gender == "male" %}selected{% endif %}>Male</option>
+                <option value="female" {% if health_profile.gender == "female" %}selected{% endif %}>Female</option>
+                <option value="other" {% if health_profile.gender == "other" %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+
+            <!-- Blood Type -->
+            <div class="mb-3">
+              <label class="form-label">Blood Type:</label>
+              <select class="form-select" name="blood">
+                <option value="">Select Blood Type</option>
+                <option value="A+" {% if health_profile.blood_type == "A+" %}selected{% endif %}>A+</option>
+                <option value="A-" {% if health_profile.blood_type == "A-" %}selected{% endif %}>A-</option>
+                <option value="B+" {% if health_profile.blood_type == "B+" %}selected{% endif %}>B+</option>
+                <option value="B-" {% if health_profile.blood_type == "B-" %}selected{% endif %}>B-</option>
+                <option value="AB+" {% if health_profile.blood_type == "AB+" %}selected{% endif %}>AB+</option>
+                <option value="AB-" {% if health_profile.blood_type == "AB-" %}selected{% endif %}>AB-</option>
+                <option value="O+" {% if health_profile.blood_type == "O+" %}selected{% endif %}>O+</option>
+                <option value="O-" {% if health_profile.blood_type == "O-" %}selected{% endif %}>O-</option>
+              </select>
+            </div>
+
+            <!-- Height -->
+            <div class="mb-3">
+              <label class="form-label">Height (cm):</label>
+              <input type="number" class="form-control" name="height"
+                     value="{{ health_profile.height }}">
+            </div>
+
+            <!-- Weight -->
+            <div class="mb-3">
+              <label class="form-label">Weight (kg):</label>
+              <input type="number" class="form-control" name="weight"
+                     value="{{ health_profile.weight }}">
+            </div>
+
+            <!-- Known Medical Conditions -->
+            <div class="mb-3">
+              <label class="form-label">Known Medical Conditions</label>
+              <textarea class="form-control" name="conditions" rows="3">{{ health_profile.known_conditions }}</textarea>
+            </div>
+
+            <!-- Allergies -->
+            <div class="mb-3">
+              <label class="form-label">Allergies</label>
+              <textarea class="form-control" name="allergies" rows="2">{{ health_profile.allergies }}</textarea>
+            </div>
+
+            <!-- Blood Pressure -->
+            <div class="mb-3">
+              <label class="form-label">Blood Pressure</label>
+              <input type="text" class="form-control" name="blood_pressure"
+                     value="{{ health_profile.blood_pressure }}">
+            </div>
+
+            <!-- Last Checkup Date -->
+            <div class="mb-3">
+              <label class="form-label">Last Medical Checkup Date</label>
+              <input type="date" class="form-control" name="last_checkup_date"
+                     value="{{ health_profile.last_checkup_date|date:'Y-m-d' }}">
+            </div>
+
+            <!-- ================= BUTTONS ================= -->
+            <div class="d-grid gap-2">
+
+               <!-- Add / Update Button -->
+              <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm text-white">
+                {% if is_new %}
+                  Add Health Profile
+                {% else %}
+                  Update Profile
+                {% endif %}
+              </button>
+
+              <!-- Delete Button -->
+              {% if not is_new %}
+              <button type="submit" name="delete_profile" 
+                      class="btn btn-outline-danger btn-lg w-100 shadow-sm"
+                      onclick="return confirm('Are you sure you want to delete your health profile?');">
+                Delete Profile
+              </button>
+              {% endif %}
+
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends "guidence/split/admin_base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2 class="mb-4">Illness Information</h2>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Add Illness Button -->
+  <div class="mb-3 text-end">
+    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addIllnessModal">
+      Add Illness
+    </button>
+  </div>
+
+  <!-- Category Filter -->
+  <form method="get" class="mb-3">
+    <label>Filter by Category:</label>
+    <select name="category" class="form-select w-auto d-inline-block">
+      <option value="">All Categories</option>
+      {% for cat_key, cat_name in categories %}
+        <option value="{{ cat_key }}" {% if selected_category == cat_key %}selected{% endif %}>{{ cat_name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+  </form>
+
+  <!-- Illness List -->
+  <div class="accordion" id="illnessAccordion">
+    {% for illness in illnesses %}
+      <div class="accordion-item mb-2">
+        <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+            {{ illness.name }} - {{ illness.get_category_display }}
+          </button>
+        </h2>
+        <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#illnessAccordion">
+          <div class="accordion-body">
+            <p><strong>Description:</strong> {{ illness.description }}</p>
+            <p><strong>Primary Symptoms:</strong> {{ illness.primary_symptoms }}</p>
+            <p><strong>Severity:</strong> {{ illness.get_severity_display }}</p>
+
+            <!-- Action Buttons -->
+            <div class="mt-2 text-end">
+              <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#updateIllnessModal{{ illness.id }}">Update</button>
+
+              <form method="POST" action="{% url 'admin_illness_information' %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="illness_id" value="{{ illness.id }}">
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure to delete?')">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Update Illness Modal -->
+      <div class="modal fade" id="updateIllnessModal{{ illness.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form method="POST" action="{% url 'admin_illness_information' %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="update">
+              <input type="hidden" name="illness_id" value="{{ illness.id }}">
+              <div class="modal-header">
+                <h5 class="modal-title">Update Illness</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-2">
+                  <label>Name</label>
+                  <input type="text" name="name" class="form-control" value="{{ illness.name }}" required>
+                </div>
+                <div class="mb-2">
+                  <label>Category</label>
+                  <select name="category" class="form-select" required>
+                    {% for cat_key, cat_name in categories %}
+                      <option value="{{ cat_key }}" {% if illness.category == cat_key %}selected{% endif %}>{{ cat_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <label>Description</label>
+                  <textarea name="description" class="form-control" required>{{ illness.description }}</textarea>
+                </div>
+                <div class="mb-2">
+                  <label>Primary Symptoms</label>
+                  <input type="text" name="primary_symptoms" class="form-control" value="{{ illness.primary_symptoms }}" required>
+                </div>
+                <div class="mb-2">
+                  <label>severity</label>
+                 <input type="text" name="severity" class="form-control" value="{{ illness.get_severity_display }}" required>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    {% empty %}
+      <p>No illnesses found in this category.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Add Illness Modal -->
+<div class="modal fade" id="addIllnessModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'admin_illness_information' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add">
+        <div class="modal-header">
+          <h5 class="modal-title">Add New Illness</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <label>Name</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label>Category</label>
+            <select name="category" class="form-select" required>
+              {% for cat_key, cat_name in categories %}
+                <option value="{{ cat_key }}">{{ cat_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-2">
+            <label>Description</label>
+            <textarea name="description" class="form-control" required></textarea>
+          </div>
+          <div class="mb-2">
+            <label>Primary Symptoms</label>
+            <input type="text" name="primary_symptoms" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label>Severity</label>
+            <select name="severity" class="form-select" required>
+                {% for key, label in severity_choices %}
+                    <option value="{{ key }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success btn-sm">Add</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
