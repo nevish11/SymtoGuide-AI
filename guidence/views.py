@@ -495,31 +495,39 @@ def user_run_ai_analysis(request, symptom_id):
     )
 
     ai_response = analyze_symptoms_with_ai(symptom_text)
-    # 🔹 AI response se text nikalo
+    
     raw_content = ""
-    try:
-        raw_content = ai_response["choices"][0]["message"]["content"]
-    except Exception:
+    # Safely extract content using .get() to avoid KeyError
+    if isinstance(ai_response, dict):
+        choices = ai_response.get("choices")
+        if choices and len(choices) > 0:
+            raw_content = choices[0].get("message", {}).get("content", "")
+        else:
+            # If 'choices' is missing, the response might be an error or different format
+            raw_content = str(ai_response)
+    else:
         raw_content = str(ai_response)
-        print("AI RESPONSE:", raw_content)
 
+    print("AI RESPONSE:", raw_content)
 
-    # 🔹 ```json block remove karo agar ho
     if "```json" in raw_content:
         raw_content = raw_content.split("```json")[1].split("```")[0].strip()
+    elif "```" in raw_content:
+        # Handling cases where it might just be ``` instead of ```json
+        raw_content = raw_content.split("```")[1].strip()
 
-    # 🔹 JSON parse karo
     data = {}
     try:
         data = json.loads(raw_content)
     except Exception:
+        # Fallback if JSON parsing fails
         pass
 
     illnesses = data.get("illnesses") or []
 
     guidance_text = data.get("guidance") or raw_content
 
-    if data.get("guidance"):
+    if data.get("guidance") and isinstance(illnesses, list):
         illnesses.append({
             "type": "guidance",
             "text": data.get("guidance")
