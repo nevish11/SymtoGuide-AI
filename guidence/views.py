@@ -571,6 +571,14 @@ def user_run_ai_analysis(request, symptom_id):
         }
     )
 
+    # આ લાઈન ફંક્શનની અંદર હોવી જરૂરી છે
+    return render(request, "guidence/split/user_ai_analysis.html", {
+        "symptom": symptom,
+        "analysis": analysis,
+        "ai_text": guidance_text,
+        "is_error": is_error,
+    })
+
 @staff_member_required
 def admin_ai_analysis(request,symptom_id=None):
     reports = SymptomLog.objects.filter(user__is_staff=False).select_related('ai_analysis', 'user').order_by('-id')
