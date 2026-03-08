@@ -1,5 +1,7 @@
 import json
+import re
 from urllib import request
+from venv import logger
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
@@ -494,36 +496,37 @@ def user_run_ai_analysis(request, symptom_id):
         f'"guidance" (string with health advice).'
     )
 
-    ai_response = analyze_symptoms_with_ai(symptom_text)
+    # API call start
+    try:
+        ai_response = analyze_symptoms_with_ai(symptom_text)
+    except Exception as e:
+        logger.error(f"API Call Failed: {str(e)}")
+        ai_response = {"error": {"message": f"Connection Error: {str(e)}"}}
     
     raw_content = ""
     is_error = False
 
-    # FIX: Using .get() to prevent KeyError 'choices'
+    # Handling API Response safely
     if isinstance(ai_response, dict):
         if "error" in ai_response:
             is_error = True
-            # Extract specific error message if available
-            err_msg = ai_response["error"].get("message", "Unknown API error")
-            raw_content = f"API Error: {err_msg}"
+            err_details = ai_response.get("error", {})
+            raw_content = f"API Error ({err_details.get('code', 'No Code')}): {err_details.get('message', 'Unknown Error')}"
+            logger.error(f"AI API Error: {raw_content}")
         else:
             choices = ai_response.get("choices")
             if choices and isinstance(choices, list) and len(choices) > 0:
                 raw_content = choices[0].get("message", {}).get("content", "")
             else:
-                # If 'choices' is missing or empty
                 raw_content = str(ai_response)
-                # If the response looks like an error string
                 if "error" in raw_content.lower():
                     is_error = True
     else:
         raw_content = str(ai_response)
 
-    print("AI RESPONSE DEBUG:", raw_content)
-
     data = {}
     if not is_error and raw_content:
-        # Robust extraction of JSON
+        # Regex to extract JSON block
         if "```json" in raw_content:
             try:
                 raw_content = raw_content.split("```json")[1].split("```")[0].strip()
@@ -538,7 +541,6 @@ def user_run_ai_analysis(request, symptom_id):
         try:
             data = json.loads(raw_content)
         except Exception:
-            # If standard JSON parsing fails, try to find { }
             match = re.search(r'\{.*\}', raw_content, re.DOTALL)
             if match:
                 try:
@@ -553,13 +555,13 @@ def user_run_ai_analysis(request, symptom_id):
     guidance_text = data.get("guidance") or raw_content
 
     if data.get("guidance") and isinstance(illnesses, list):
-        # Only append if guidance isn't already there
         if not any(item.get('type') == 'guidance' for item in illnesses):
             illnesses.append({
                 "type": "guidance",
                 "text": data.get("guidance")
             })
 
+    # Save analysis even if there is an error (to show error message on UI)
     analysis, _ = AIAnalysis.objects.update_or_create(
         symptom_log=symptom,
         defaults={
@@ -568,13 +570,6 @@ def user_run_ai_analysis(request, symptom_id):
             "urgency_level": data.get("urgency") or "self_monitor",
         }
     )
-
-    return render(request, "guidence/split/user_ai_analysis.html", {
-        "symptom": symptom,
-        "analysis": analysis,
-        "ai_text": guidance_text,
-        "is_error": is_error,
-    })
 
 @staff_member_required
 def admin_ai_analysis(request,symptom_id=None):
